@@ -20,6 +20,7 @@ class Crop extends StatefulWidget {
   final bool alwaysShowGrid;
   final ImageErrorListener onImageError;
   final bool circleMode;
+  final bool noOverlay;
 
   const Crop({
     Key key,
@@ -29,9 +30,11 @@ class Crop extends StatefulWidget {
     this.alwaysShowGrid: false,
     this.onImageError,
     this.circleMode: false,
+    this.noOverlay: false,
   })  : assert(image != null),
         assert(maximumScale != null),
         assert(alwaysShowGrid != null),
+        assert(noOverlay && !circleMode),
         super(key: key);
 
   Crop.file(
@@ -43,9 +46,11 @@ class Crop extends StatefulWidget {
     this.alwaysShowGrid: false,
     this.onImageError,
     this.circleMode: false,
+    this.noOverlay: false,
   })  : image = FileImage(file, scale: scale),
         assert(maximumScale != null),
         assert(alwaysShowGrid != null),
+        assert(noOverlay && !circleMode),
         super(key: key);
 
   Crop.asset(
@@ -58,9 +63,11 @@ class Crop extends StatefulWidget {
     this.alwaysShowGrid: false,
     this.onImageError,
     this.circleMode: false,
+    this.noOverlay: false,
   })  : image = AssetImage(assetName, bundle: bundle, package: package),
         assert(maximumScale != null),
         assert(alwaysShowGrid != null),
+        assert(noOverlay && !circleMode),
         super(key: key);
 
   @override
@@ -189,6 +196,7 @@ class CropState extends State<Crop> with TickerProviderStateMixin, Drag {
             scale: _scale,
             active: _activeController.value,
             circleMode: widget.circleMode,
+            noOverlay: widget.noOverlay,
           ),
         ),
       ),
@@ -515,6 +523,7 @@ class _CropPainter extends CustomPainter {
   final double scale;
   final double active;
   final bool circleMode;
+  final bool noOverlay;
 
   _CropPainter({
     this.image,
@@ -524,6 +533,7 @@ class _CropPainter extends CustomPainter {
     this.scale,
     this.active,
     this.circleMode,
+    this.noOverlay,
   });
 
   @override
@@ -582,30 +592,32 @@ class _CropPainter extends CustomPainter {
       rect.width * area.width,
       rect.height * area.height,
     );
-    if (circleMode == true) {
-      canvas.drawDRRect(
-          RRect.fromLTRBR(0.0, 0.0, rect.width, rect.height, Radius.zero),
-          RRect.fromLTRBR(boundaries.left, boundaries.top, boundaries.right,
-              boundaries.bottom, Radius.circular(rect.width)),
-          paint);
-    } else {
-      canvas.drawRect(
-          Rect.fromLTRB(0.0, 0.0, rect.width, boundaries.top), paint);
-      canvas.drawRect(
-          Rect.fromLTRB(0.0, boundaries.bottom, rect.width, rect.height),
-          paint);
-      canvas.drawRect(
-          Rect.fromLTRB(
-              0.0, boundaries.top, boundaries.left, boundaries.bottom),
-          paint);
-      canvas.drawRect(
-          Rect.fromLTRB(
-              boundaries.right, boundaries.top, rect.width, boundaries.bottom),
-          paint);
+    if (!noOverlay) {
+      if (circleMode == true) {
+        canvas.drawDRRect(
+            RRect.fromLTRBR(0.0, 0.0, rect.width, rect.height, Radius.zero),
+            RRect.fromLTRBR(boundaries.left, boundaries.top, boundaries.right,
+                boundaries.bottom, Radius.circular(rect.width)),
+            paint);
+      } else {
+        canvas.drawRect(
+            Rect.fromLTRB(0.0, 0.0, rect.width, boundaries.top), paint);
+        canvas.drawRect(
+            Rect.fromLTRB(0.0, boundaries.bottom, rect.width, rect.height),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTRB(
+                0.0, boundaries.top, boundaries.left, boundaries.bottom),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTRB(boundaries.right, boundaries.top, rect.width,
+                boundaries.bottom),
+            paint);
 
-      if (!boundaries.isEmpty) {
-        _drawGrid(canvas, boundaries);
-        _drawHandles(canvas, boundaries);
+        if (!boundaries.isEmpty) {
+          _drawGrid(canvas, boundaries);
+          _drawHandles(canvas, boundaries);
+        }
       }
     }
 

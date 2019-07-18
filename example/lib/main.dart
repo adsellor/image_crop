@@ -7,7 +7,7 @@ import 'package:image_crop/image_crop.dart';
 
 // Hidden import to let `flutter packages pub publish --dry-run` complete without errors
 // FIXME: uncomment to try out example code
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -61,7 +61,11 @@ class _MyAppState extends State<MyApp> {
     return Column(
       children: <Widget>[
         Expanded(
-          child: Crop.file(_sample, key: cropKey),
+          child: Crop.file(
+            _sample,
+            key: cropKey,
+            noOverlay: true,
+          ),
         ),
         Container(
           padding: const EdgeInsets.only(top: 20.0),
@@ -72,7 +76,10 @@ class _MyAppState extends State<MyApp> {
               FlatButton(
                 child: Text(
                   'Crop Image',
-                  style: Theme.of(context).textTheme.button.copyWith(color: Colors.white),
+                  style: Theme.of(context)
+                      .textTheme
+                      .button
+                      .copyWith(color: Colors.white),
                 ),
                 onPressed: () => _cropImage(),
               ),
